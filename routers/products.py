@@ -18,6 +18,7 @@ async def create_product(
 ):
     db_product = Product(
         name=product.name,
+        competitor_name=product.competitor_name,
         price=product.price,
         url=str(product.url) if product.url else None
     )
