@@ -21,7 +21,7 @@ async def create_product(
     db_product = Product(
         name=product.name,
         price=product.price,
-        url=product.url
+        url=str(product.url) if product.url else None
     )
     db.add(db_product)
     await db.commit()
@@ -65,6 +65,9 @@ async def update_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     update_data = product_update.model_dump(exclude_unset=True)
+    
+    if "url" in update_data and update_data["url"] is not None:
+        update_data["url"] = str(update_data["url"])
 
     for field, value in update_data.items():
         setattr(product, field, value)
