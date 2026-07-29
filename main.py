@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from database import get_db, engine, Base
 from models import Product
-from schemas import ProductCreate, ProductResponse
+from schemas import ProductCreate, ProductResponse, ProductUpdate
 
 app = FastAPI()
 
@@ -50,6 +50,30 @@ async def read_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     return product
+
+@app.patch("/products/{product_id}", response_model=ProductResponse)
+async def update_product(
+    product_id: int,
+    product_update: ProductUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Product).where(Product.id == product_id)
+    result = await db.execute(query)
+    product = result.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    update_data = product_update.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(product, field, value)
+
+    await db.commit()
+    await db.refresh(product)
+
+    return product
+
 @app.delete("/products/{product_id}")
 async def delete_product(
     product_id: int,

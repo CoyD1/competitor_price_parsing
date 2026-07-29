@@ -6,6 +6,11 @@ class ProductCreate(BaseModel):
     price: int
     url: str | None = None
 
+class ProductUpdate(BaseModel):
+    name: str | None = None
+    price: int | None = None
+    url: str | None = None
+    
 class ProductResponse(BaseModel):
     id: int
     name: str
