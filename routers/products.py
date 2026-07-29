@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from database import get_db
-from models import Product
-from schemas import ProductCreate, ProductResponse, ProductUpdate
+from models import Product, PriceHistory
+from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse
 
 router = APIRouter(
     prefix="/products",
@@ -49,6 +49,27 @@ async def read_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     return product
+@router.get("/{prodict_id}/price-history", response_model=list[PriceHistoryResponse])
+async def read_product_price_history(
+    product_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    product_query = select(Product).where(Product.id == product_id)
+    product_result = await db.execute(product_query)
+    product = product_result.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    history_query = (
+        select(PriceHistory)
+        .where(PriceHistory.product_id == product_id)
+        .order_by(PriceHistory.checked_at.desc())
+    )
+    history_result = await db.execute(history_query)
+    history = history_result.scalars().all()
+
+    return history
 
 @router.patch("/{product_id}", response_model=ProductResponse)
 async def update_product(

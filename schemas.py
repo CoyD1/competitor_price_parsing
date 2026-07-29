@@ -23,3 +23,11 @@ class ProductResponse(BaseModel):
     last_checked_at: datetime | None = None
 
     model_config = {"from_attributes": True}
+
+class PriceHistoryResponse(BaseModel):
+    id: int
+    product_id: int
+    price: int
+    checked_at: datetime
+
+    model_config = {"from_attributes": True}
