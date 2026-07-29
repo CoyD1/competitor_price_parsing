@@ -23,21 +23,21 @@ async def create_product(
         price=product.price,
         url=product.url
     )
-    db_add(db_product)
+    db.add(db_product)
     await db.commit()
     await db.refresh(db_product)
     return db_product
 
 @app.get("/products/", response_model=list[ProductResponse])
-async def read_product(
-db: AsyncSession = Depends(get_db)
+async def read_products(
+    db: AsyncSession = Depends(get_db)
 ):
     query = select(Product)
     result = await db.execute(query)
     products = result.scalars().all()
     return products
 
-@app.get("/products/{products_id}", response_model=ProductResponse)
+@app.get("/products/{product_id}", response_model=ProductResponse)
 async def read_product(
     product_id: int,
     db: AsyncSession = Depends(get_db)
@@ -50,3 +50,19 @@ async def read_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     return product
+@app.delete("/products/{product_id}")
+async def delete_product(
+    product_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Product).where(Product.id == product_id)
+    result = await db.execute(query)
+    product = result.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    await db.delete(product)
+    await db.commit()
+
+    return {"message": "Product deleted successfully"}
