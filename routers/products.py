@@ -49,7 +49,7 @@ async def read_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     return product
-@router.get("/{prodict_id}/price-history", response_model=list[PriceHistoryResponse])
+@router.get("/{product_id}/price-history", response_model=list[PriceHistoryResponse])
 async def read_product_price_history(
     product_id: int,
     db: AsyncSession = Depends(get_db)

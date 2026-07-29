@@ -19,7 +19,7 @@ class Product(Base):
     )
 
 class PriceHistory(Base):
-    __tablename__ = "PriceHistory"
+    __tablename__ = "price_history"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
