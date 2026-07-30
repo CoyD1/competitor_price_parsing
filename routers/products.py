@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from datetime import datetime
 
 from database import get_db
 from models import Product, PriceHistory
@@ -25,6 +26,17 @@ async def create_product(
     db.add(db_product)
     await db.commit()
     await db.refresh(db_product)
+
+    price_history = PriceHistory(
+        product_id=db_product.id,
+        price=db_product.price,
+        checked_at=datetime.utcnow()
+    )
+
+    db.add(price_history)
+    await db.commit()
+    await db.refresh(db_product)
+
     return db_product
 
 @router.get("/", response_model=list[ProductResponse])
@@ -49,6 +61,7 @@ async def read_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     return product
+
 @router.get("/{product_id}/price-history", response_model=list[PriceHistoryResponse])
 async def read_product_price_history(
     product_id: int,
@@ -85,12 +98,24 @@ async def update_product(
         raise HTTPException(status_code=404, detail="Product not found")
     
     update_data = product_update.model_dump(exclude_unset=True)
+    old_price = product.price
     
     if "url" in update_data and update_data["url"] is not None:
         update_data["url"] = str(update_data["url"])
 
     for field, value in update_data.items():
         setattr(product, field, value)
+
+    if "price" in update_data and product.price != old_price:
+        product.last_checked_at = datetime.utcnow()
+
+        price_history = PriceHistory(
+            product_id=product.id,
+            price=product.price,
+            checked_at=product.last_checked_at
+        )
+    
+        db.add(price_history)
 
     await db.commit()
     await db.refresh(product)
