@@ -5,7 +5,7 @@ from datetime import datetime
 
 from database import get_db
 from models import Product, PriceHistory
-from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse
+from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse, PriceCheckCreate
 
 router = APIRouter(
     prefix="/products",
@@ -83,6 +83,37 @@ async def read_product_price_history(
     history = history_result.scalars().all()
 
     return history
+
+@router.post("/{product_id}/price-check", response_model=ProductResponse)
+async def create_product_price_check(
+    product_id: int,
+    price_check: PriceCheckCreate,
+    db: AsyncSession = Depends(get_db)
+):
+    query = select(Product).where(Product.id == product_id)
+    result = await db.execute(query)
+    product = result.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    checked_at = datetime.utcnow()
+
+    product.price = price_check.price
+    product.last_checked_at = checked_at
+
+    price_history = PriceHistory(
+        product_id=product.id,
+        price=price_check.price,
+        checked_at=checked_at
+    )
+
+    db.add(price_history)
+
+    await db.commit()
+    await db.refresh(product)
+
+    return product
 
 @router.patch("/{product_id}", response_model=ProductResponse)
 async def update_product(

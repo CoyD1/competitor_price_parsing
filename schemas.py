@@ -31,3 +31,6 @@ class PriceHistoryResponse(BaseModel):
     checked_at: datetime
 
     model_config = {"from_attributes": True}
+
+class PriceCheckCreate(BaseModel):
+    price: int = Field(gt=0)
