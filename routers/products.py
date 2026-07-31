@@ -22,7 +22,8 @@ async def create_product(
         name=product.name,
         competitor_name=product.competitor_name,
         price=product.price,
-        url=str(product.url) if product.url else None
+        url=str(product.url) if product.url else None,
+        price_selector=product.price_selector
     )
     db.add(db_product)
     await db.commit()

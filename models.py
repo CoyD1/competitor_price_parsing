@@ -11,6 +11,7 @@ class Product(Base):
     competitor_name: Mapped[str | None] = mapped_column(String, nullable=True)
     price: Mapped[int] = mapped_column(Integer)
     url: Mapped[str | None] = mapped_column(String, nullable=True)
+    price_selector: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     last_checked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     price_history: Mapped[list["PriceHistory"]] = relationship(
