@@ -6,6 +6,7 @@ from datetime import datetime
 from database import get_db
 from models import Product, PriceHistory
 from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse, PriceCheckCreate
+from services.products import record_price_check
 
 router = APIRouter(
     prefix="/products",
@@ -97,23 +98,11 @@ async def create_product_price_check(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    checked_at = datetime.utcnow()
-
-    product.price = price_check.price
-    product.last_checked_at = checked_at
-
-    price_history = PriceHistory(
-        product_id=product.id,
-        price=price_check.price,
-        checked_at=checked_at
+    return await record_price_check(
+        db=db,
+        product=product,
+        price=price_check.price
     )
-
-    db.add(price_history)
-
-    await db.commit()
-    await db.refresh(product)
-
-    return product
 
 @router.patch("/{product_id}", response_model=ProductResponse)
 async def update_product(
