@@ -3,12 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
 
-import httpx
 from database import get_db
 from models import Product, PriceHistory
 from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse, PriceCheckCreate
-from services.products import record_price_check
-from parser.price_parser import fetch_price_from_url
+from services.products import record_price_check, parse_and_record_product_price
 
 router = APIRouter(
     prefix="/products",
@@ -112,44 +110,9 @@ async def parse_product_price(
     product_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Product).where(Product.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    if not product.url:
-        raise HTTPException(status_code=400, detail="Product url is not set")
-    
-    if not product.price_selector:
-        raise HTTPException(status_code=400, detail="Product price selector is not set")
-    
-    try:
-        parsed_price = await fetch_price_from_url(
-            url=product.url,
-            price_selector=product.price_selector
-        )
-    except httpx.HTTPStatusError as error:
-        status_code = error.response.status_code
-        raise HTTPException(
-            status_code=502,
-            detail=f"Product page returned status {status_code}"
-        )
-    
-    except httpx.RequestError as error:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Failed to fetch product page: {error.__class__.__name__}"
-        )
-    
-    except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
-    
-    return await record_price_check(
+    return await parse_and_record_product_price(
         db=db,
-        product=product,
-        price=parsed_price
+        product_id=product_id
     )
 
 @router.patch("/{product_id}", response_model=ProductResponse)
