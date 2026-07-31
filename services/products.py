@@ -8,6 +8,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models import Product, PriceHistory
 from parser.price_parser import fetch_price_from_url
 
+async def get_product_or_404(
+        db: AsyncSession,
+        product_id: int
+) -> Product:
+    query = select(Product).where(Product.id == product_id)
+    result = await db.execute(query)
+    product = result.scalar_one_or_none()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    return product
+
 async def record_price_check(
         db: AsyncSession,
         product: Product,
@@ -35,12 +48,7 @@ async def parse_and_record_product_price(
         db: AsyncSession,
         product_id: int
 ) -> Product:
-    query = select(Product).where(Product.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = await get_product_or_404(db, product_id)
     
     if not product.url:
         raise HTTPException(status_code=400, detail="Product url is not set")

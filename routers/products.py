@@ -6,7 +6,7 @@ from datetime import datetime
 from database import get_db
 from models import Product, PriceHistory
 from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse, PriceCheckCreate
-from services.products import record_price_check, parse_and_record_product_price
+from services.products import record_price_check, parse_and_record_product_price, get_product_or_404
 
 router = APIRouter(
     prefix="/products",
@@ -55,26 +55,15 @@ async def read_product(
     product_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Product).where(Product.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    
-    return product
+      
+    return await get_product_or_404(db, product_id)
 
 @router.get("/{product_id}/price-history", response_model=list[PriceHistoryResponse])
 async def read_product_price_history(
     product_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    product_query = select(Product).where(Product.id == product_id)
-    product_result = await db.execute(product_query)
-    product = product_result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    await get_product_or_404(db, product_id)
     
     history_query = (
         select(PriceHistory)
@@ -92,12 +81,7 @@ async def create_product_price_check(
     price_check: PriceCheckCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Product).where(Product.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = await get_product_or_404(db, product_id)
     
     return await record_price_check(
         db=db,
@@ -121,12 +105,7 @@ async def update_product(
     product_update: ProductUpdate,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Product).where(Product.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = await get_product_or_404(db, product_id)
     
     update_data = product_update.model_dump(exclude_unset=True)
     old_price = product.price
@@ -158,12 +137,7 @@ async def delete_product(
     product_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    query = select(Product).where(Product.id == product_id)
-    result = await db.execute(query)
-    product = result.scalar_one_or_none()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = await get_product_or_404(db, product_id)
     
     await db.delete(product)
     await db.commit()
