@@ -20,7 +20,7 @@ def extract_price_from_html(html: str, price_selector: str) -> int:
     return int(price_digits)
 
 async def fetch_price_from_url(url: str, price_selector: str) -> int:
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
         response = await client.get(url)
 
     response.raise_for_status()
