@@ -1,5 +1,6 @@
 import re
 
+import httpx
 from bs4 import BeautifulSoup
 
 
@@ -17,3 +18,11 @@ def extract_price_from_html(html: str, price_selector: str) -> int:
         raise ValueError("Price text does not contain digits")
     
     return int(price_digits)
+
+async def fetch_price_from_url(url: str, price_selector: str) -> int:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.get(url)
+
+    response.raise_for_status()
+
+    return extract_price_from_html(response.text, price_selector)
