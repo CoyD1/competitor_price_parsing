@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
@@ -54,8 +54,7 @@ async def read_products(
 async def read_product(
     product_id: int,
     db: AsyncSession = Depends(get_db)
-):
-      
+):   
     return await get_product_or_404(db, product_id)
 
 @router.get("/{product_id}/price-history", response_model=list[PriceHistoryResponse])

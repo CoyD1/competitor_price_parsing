@@ -3,6 +3,14 @@ import re
 import httpx
 from bs4 import BeautifulSoup
 
+DEFAULT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/127.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
 
 def extract_price_from_html(html: str, price_selector: str) -> int:
     soup = BeautifulSoup(html, "html.parser")
@@ -21,7 +29,7 @@ def extract_price_from_html(html: str, price_selector: str) -> int:
 
 async def fetch_price_from_url(url: str, price_selector: str) -> int:
     async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
-        response = await client.get(url)
+        response = await client.get(url, headers=DEFAULT_HEADERS)
 
     response.raise_for_status()
 
