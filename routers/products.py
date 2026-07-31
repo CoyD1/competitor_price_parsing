@@ -130,10 +130,19 @@ async def parse_product_price(
             url=product.url,
             price_selector=product.price_selector
         )
-    except httpx.HTTPStatusError:
-        raise HTTPException(status_code=502, detail="Product page returned error status")
-    except httpx.RequestError:
-        raise HTTPException(status_code=502, detail="Failed to fetch product page")
+    except httpx.HTTPStatusError as error:
+        status_code = error.response.status_code
+        raise HTTPException(
+            status_code=502,
+            detail=f"Product page returned status {status_code}"
+        )
+    
+    except httpx.RequestError as error:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to fetch product page: {error.__class__.__name__}"
+        )
+    
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error))
     
