@@ -6,7 +6,7 @@ from datetime import datetime
 from database import get_db
 from models import Product, PriceHistory
 from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse, PriceCheckCreate
-from services.products import record_price_check, parse_and_record_product_price, get_product_or_404
+from services.products import record_price_check, parse_and_record_product_price, get_product_or_404, create_product_with_initial_history
 
 router = APIRouter(
     prefix="/products",
@@ -18,28 +18,7 @@ async def create_product(
     product: ProductCreate, 
     db: AsyncSession = Depends(get_db)
 ):
-    db_product = Product(
-        name=product.name,
-        competitor_name=product.competitor_name,
-        price=product.price,
-        url=str(product.url) if product.url else None,
-        price_selector=product.price_selector
-    )
-    db.add(db_product)
-    await db.commit()
-    await db.refresh(db_product)
-
-    price_history = PriceHistory(
-        product_id=db_product.id,
-        price=db_product.price,
-        checked_at=datetime.utcnow()
-    )
-
-    db.add(price_history)
-    await db.commit()
-    await db.refresh(db_product)
-
-    return db_product
+    return await create_product_with_initial_history(db=db, product_data=product)
 
 @router.get("/", response_model=list[ProductResponse])
 async def read_products(

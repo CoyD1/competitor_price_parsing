@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Product, PriceHistory
 from parser.price_parser import fetch_price_from_url
+from schemas import ProductCreate
 
 async def get_product_or_404(
         db: AsyncSession,
@@ -42,6 +43,37 @@ async def record_price_check(
     await db.commit()
     await db.refresh(product)
     
+    return product
+
+async def create_product_with_initial_history(
+    db: AsyncSession,
+    product_data: ProductCreate
+) -> Product:
+    checked_at = datetime.utcnow()
+
+    product = Product(
+        name=product_data.name,
+        competitor_name=product_data.competitor_name,
+        price=product_data.price,
+        url=str(product_data.url) if product_data.url else None,
+        price_selector=product_data.price_selector,
+        last_checked_at=checked_at
+    )
+
+    db.add(product)
+    await db.flush()
+
+    price_history = PriceHistory(
+        product_id=product.id,
+        price=product.price,
+        checked_at=checked_at
+    )
+
+    db.add(price_history)
+
+    await db.commit()
+    await db.refresh(product)
+
     return product
 
 async def parse_and_record_product_price(
