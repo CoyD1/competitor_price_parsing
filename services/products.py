@@ -99,16 +99,16 @@ async def parse_and_record_product_price(
         raise HTTPException(
             status_code=502,
             detail=f"Product page returned status {status_code}"
-        )
+        ) from error
     
     except httpx.RequestError as error:
         raise HTTPException(
             status_code=502,
             detail=f"Failed to fetch product page: {error.__class__.__name__}"
-        )
+        ) from error
     
     except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+        raise HTTPException(status_code=400, detail=str(error)) from error
     
     return await record_price_check(
         db=db,
