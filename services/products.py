@@ -5,9 +5,10 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import Product, PriceHistory
+from models import PriceHistory, Product
 from parser.price_parser import fetch_price_from_url
 from schemas import ProductCreate
+
 
 async def get_product_or_404(
         db: AsyncSession,

@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field, HttpUrl
 from datetime import datetime
+
+from pydantic import BaseModel, Field, HttpUrl
+
 
 class ProductCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)

@@ -1,12 +1,24 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 from datetime import datetime
 
+from fastapi import APIRouter, Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
-from models import Product, PriceHistory
-from schemas import ProductCreate, ProductResponse, ProductUpdate, PriceHistoryResponse, PriceCheckCreate
-from services.products import record_price_check, parse_and_record_product_price, get_product_or_404, create_product_with_initial_history
+from models import PriceHistory, Product
+from schemas import (
+    PriceCheckCreate,
+    PriceHistoryResponse,
+    ProductCreate,
+    ProductResponse,
+    ProductUpdate,
+)
+from services.products import (
+    create_product_with_initial_history,
+    get_product_or_404,
+    parse_and_record_product_price,
+    record_price_check,
+)
 
 router = APIRouter(
     prefix="/products",
