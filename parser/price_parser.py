@@ -12,6 +12,14 @@ DEFAULT_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
+async def fetch_html_from_url(url: str) -> httpx.Response:
+    async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
+        response = await client.get(url, headers=DEFAULT_HEADERS)
+
+    response.raise_for_status()
+
+    return response
+
 def extract_price_from_html(html: str, price_selector: str) -> int:
     soup = BeautifulSoup(html, "html.parser")
     price_element = soup.select_one(price_selector)
@@ -28,9 +36,6 @@ def extract_price_from_html(html: str, price_selector: str) -> int:
     return int(price_digits)
 
 async def fetch_price_from_url(url: str, price_selector: str) -> int:
-    async with httpx.AsyncClient(timeout=10.0, trust_env=False) as client:
-        response = await client.get(url, headers=DEFAULT_HEADERS)
-
-    response.raise_for_status()
+    response = await fetch_html_from_url(url)
 
     return extract_price_from_html(response.text, price_selector)

@@ -1,13 +1,14 @@
 from datetime import datetime
 
 import httpx
+from bs4 import BeautifulSoup
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import PriceHistory, Product
-from parser.price_parser import fetch_price_from_url
-from schemas import ProductCreate
+from parser.price_parser import extract_price_from_html, fetch_html_from_url, fetch_price_from_url
+from schemas import ProductCreate, ProductFetchPreviewResponse
 
 
 async def get_product_or_404(
@@ -114,4 +115,61 @@ async def parse_and_record_product_price(
         db=db,
         product=product,
         price=parsed_price
+    )
+
+async def preview_product_fetch(
+        db: AsyncSession,
+        product_id: int
+) -> ProductFetchPreviewResponse:
+    product = await get_product_or_404(db, product_id)
+
+    if not product.url:
+        raise HTTPException(status_code=400, detail="Product url is not set")
+    
+    if not product.price_selector:
+        raise HTTPException(status_code=400, detail="Product price selector is not set")
+    
+    try:
+        response = await fetch_html_from_url(product.url)
+    except httpx.HTTPStatusError as error:
+        status_code = error.response.status_code
+        raise HTTPException(
+            status_code=502,
+            detail=f"Product page returned status {status_code}"
+        ) from error
+    except httpx.RequestError as error:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to fetch product page: {error.__class__.__name__}"
+        ) from error
+    
+    soup = BeautifulSoup(response.text, "html.parser")
+    price_element = soup.select_one(product.price_selector)
+
+    if not price_element:
+        return ProductFetchPreviewResponse(
+            product_id=product.id,
+            url=product.url,
+            price_selector=product.price_selector,
+            status_code=response.status_code,
+            html_length=len(response.text),
+            selector_found=False,
+        )
+    
+    price_text = price_element.get_text(strip=True)
+
+    try:
+        parsed_price = extract_price_from_html(response.text, product.price_selector)
+    except ValueError:
+        parsed_price = None
+
+    return ProductFetchPreviewResponse(
+        product_id=product.id,
+        url=product.url,
+        price_selector=product.price_selector,
+        status_code=response.status_code,
+        html_length=len(response.text),
+        selector_found=True,
+        price_text=price_text,
+        parsed_price=parsed_price,
     )

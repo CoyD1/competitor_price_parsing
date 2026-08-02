@@ -39,3 +39,13 @@ class PriceHistoryResponse(BaseModel):
 
 class PriceCheckCreate(BaseModel):
     price: int = Field(gt=0)
+
+class ProductFetchPreviewResponse(BaseModel):
+    product_id: int
+    url: str
+    price_selector: str
+    status_code: int
+    html_length: int
+    selector_found: bool
+    price_text: str | None = None
+    parsed_price: int | None = None

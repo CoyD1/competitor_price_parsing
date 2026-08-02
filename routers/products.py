@@ -10,6 +10,7 @@ from schemas import (
     PriceCheckCreate,
     PriceHistoryResponse,
     ProductCreate,
+    ProductFetchPreviewResponse,
     ProductResponse,
     ProductUpdate,
 )
@@ -17,6 +18,7 @@ from services.products import (
     create_product_with_initial_history,
     get_product_or_404,
     parse_and_record_product_price,
+    preview_product_fetch,
     record_price_check,
 )
 
@@ -86,6 +88,16 @@ async def parse_product_price(
 ):
     return await parse_and_record_product_price(
         db=db,
+        product_id=product_id
+    )
+
+@router.post("/{product_id}/fetch-preview", response_model=ProductFetchPreviewResponse)
+async def preview_product_fetch_endpoint(
+    product_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    return await preview_product_fetch(
+        db=db, 
         product_id=product_id
     )
 
