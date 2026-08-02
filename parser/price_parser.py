@@ -1,7 +1,10 @@
 import re
+import asyncio 
 
 import httpx
 from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
+from pathlib import Path
 
 DEFAULT_HEADERS = {
     "User-Agent": (
@@ -19,6 +22,26 @@ async def fetch_html_from_url(url: str) -> httpx.Response:
     response.raise_for_status()
 
     return response
+
+def fetch_html_with_browser_sync(url: str) -> str:
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=False, slow_mo=300)
+        page = browser.new_page(extra_http_headers=DEFAULT_HEADERS,
+                                viewport={"width": 1440, "height": 900},
+        )
+
+        page.goto(url, wait_until="networkidle", timeout=30000)
+        page.screenshot(path="debug_dns.png", full_page=True)
+
+        page.wait_for_timeout(10000)
+        html = page.content()
+        Path("debug_dns.html").write_text(html, encoding="utf-8")
+        browser.close()
+
+        return html
+
+async def fetch_html_with_browser(url: str) -> str:
+    return await asyncio.to_thread(fetch_html_with_browser_sync, url)
 
 def extract_price_from_html(html: str, price_selector: str) -> int:
     soup = BeautifulSoup(html, "html.parser")

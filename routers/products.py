@@ -20,6 +20,7 @@ from services.products import (
     parse_and_record_product_price,
     preview_product_fetch,
     record_price_check,
+    preview_product_fetch_with_browser,
 )
 
 router = APIRouter(
@@ -98,6 +99,16 @@ async def preview_product_fetch_endpoint(
 ):
     return await preview_product_fetch(
         db=db, 
+        product_id=product_id
+    )
+
+@router.post("/{product_id}/browser-fetch-preview", response_model=ProductFetchPreviewResponse)
+async def preview_product_browser_fetch_endpoint(
+    product_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    return await preview_product_fetch_with_browser(
+        db=db,
         product_id=product_id
     )
 

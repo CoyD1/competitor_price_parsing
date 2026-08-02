@@ -44,7 +44,8 @@ class ProductFetchPreviewResponse(BaseModel):
     product_id: int
     url: str
     price_selector: str
-    status_code: int
+    fetch_mode: str
+    status_code: int | None = None
     html_length: int
     selector_found: bool
     price_text: str | None = None
