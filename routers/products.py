@@ -19,8 +19,8 @@ from services.products import (
     get_product_or_404,
     parse_and_record_product_price,
     preview_product_fetch,
-    record_price_check,
     preview_product_fetch_with_browser,
+    record_price_check,
 )
 
 router = APIRouter(

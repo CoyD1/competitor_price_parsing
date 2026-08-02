@@ -7,7 +7,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import PriceHistory, Product
-from parser.price_parser import extract_price_from_html, fetch_html_from_url, fetch_price_from_url, fetch_html_with_browser
+from parser.price_parser import (
+    extract_price_from_html,
+    fetch_html_from_url,
+    fetch_html_with_browser,
+    fetch_price_from_url,
+)
 from schemas import ProductCreate, ProductFetchPreviewResponse
 
 

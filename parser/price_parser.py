@@ -1,10 +1,10 @@
+import asyncio
 import re
-import asyncio 
+from pathlib import Path
 
 import httpx
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
-from pathlib import Path
 
 DEFAULT_HEADERS = {
     "User-Agent": (
