@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import CompetitorOffer
-from schemas import CompetitorOfferCreate, CompetitorOfferResponse
+from schemas import CompetitorOfferCreate, CompetitorOfferResponse, PriceCheckResponse
 from services.competitors import create_competitor_offer
+from services.offers import check_offer_price
 
 router = APIRouter(
     prefix="/offers",
@@ -39,3 +40,10 @@ async def read_product_competitor_offers(
     offers = result.scalars().all()
 
     return offers
+
+@router.post("/{offer_id}/check-price", response_model=PriceCheckResponse)
+async def check_offer_price_endpoint(
+    offer_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    return await check_offer_price(db=db, offer_id=offer_id)
