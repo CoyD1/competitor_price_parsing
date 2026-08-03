@@ -1,19 +1,17 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from models import PriceHistory, Product
+from models import Product
 from schemas import (
     ProductCreate,
     ProductResponse,
     ProductUpdate,
 )
 from services.products import (
-    create_product_with_initial_history,
-    get_product_or_404,
+    create_product as create_product_service,
+    get_product_or_404
 )
 
 router = APIRouter(
@@ -26,7 +24,7 @@ async def create_product(
     product: ProductCreate, 
     db: AsyncSession = Depends(get_db)
 ):
-    return await create_product_with_initial_history(db=db, product_data=product)
+    return await create_product_service(db=db, product_data=product)
 
 @router.get("/", response_model=list[ProductResponse])
 async def read_products(
@@ -52,25 +50,10 @@ async def update_product(
 ):
     product = await get_product_or_404(db, product_id)
     
-    update_data = product_update.model_dump(exclude_unset=True)
-    old_price = product.price
+    update_data = product_update.model_dump(exclude_unset=True) 
     
-    if "url" in update_data and update_data["url"] is not None:
-        update_data["url"] = str(update_data["url"])
-
     for field, value in update_data.items():
         setattr(product, field, value)
-
-    if "price" in update_data and product.price != old_price:
-        product.last_checked_at = datetime.utcnow()
-
-        price_history = PriceHistory(
-            product_id=product.id,
-            price=product.price,
-            checked_at=product.last_checked_at
-        )
-    
-        db.add(price_history)
 
     await db.commit()
     await db.refresh(product)
