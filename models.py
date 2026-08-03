@@ -21,7 +21,7 @@ class Product(Base):
         back_populates="product",
         cascade="all, delete-orphan"
     )
-    competiot_offers: Mapped[list["CompetitorOffer"]] = relationship(
+    competitor_offers: Mapped[list["CompetitorOffer"]] = relationship(
         back_populates="product",
         cascade="all, delete-orphan",
     )
@@ -48,7 +48,7 @@ class CompetitorOffer(Base):
     url: Mapped[str] = mapped_column(String)
     parser_type: Mapped[str] = mapped_column(String, default="html")
     price_selector: Mapped[str | None] = mapped_column(String, nullable=True)
-    is_active: Mapped[Boolean] = mapped_column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     product: Mapped["Product"] = relationship(back_populates="competitor_offers")

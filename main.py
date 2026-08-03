@@ -6,8 +6,10 @@ if sys.platform == "win32":
 
 from fastapi import FastAPI
 
-from routers import products
+from routers import competitors, offers, products
 
 app = FastAPI()
 
 app.include_router(products.router)
+app.include_router(competitors.router)
+app.include_router(offers.router)
