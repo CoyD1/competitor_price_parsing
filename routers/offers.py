@@ -48,7 +48,7 @@ async def check_offer_price_endpoint(
 ):
     return await check_offer_price(db=db, offer_id=offer_id)
 
-@router.get("/{offer_id}/price_checks", response_model=list[PriceCheckResponse])
+@router.get("/{offer_id}/price-checks", response_model=list[PriceCheckResponse])
 async def read_offer_price_checks(
     offer_id: int,
     db: AsyncSession = Depends(get_db),
