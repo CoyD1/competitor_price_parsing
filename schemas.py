@@ -20,17 +20,6 @@ class ProductResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
-class PriceHistoryResponse(BaseModel):
-    id: int
-    product_id: int
-    price: int
-    checked_at: datetime
-
-    model_config = {"from_attributes": True}
-
-class PriceCheckCreate(BaseModel):
-    price: int = Field(gt=0)
-
 class ProductFetchPreviewResponse(BaseModel):
     product_id: int
     url: str

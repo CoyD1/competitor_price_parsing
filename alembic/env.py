@@ -3,7 +3,7 @@ import asyncio
 
 from config import DATABASE_URL
 from database import Base
-from models import Product, PriceHistory
+from models import Competitor, CompetitorOffer, PriceCheck, Product
 
 from logging.config import fileConfig
 

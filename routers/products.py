@@ -9,10 +9,8 @@ from schemas import (
     ProductResponse,
     ProductUpdate,
 )
-from services.products import (
-    create_product as create_product_service,
-    get_product_or_404
-)
+from services.products import create_product as create_product_service
+from services.products import get_product_or_404
 
 router = APIRouter(
     prefix="/products",

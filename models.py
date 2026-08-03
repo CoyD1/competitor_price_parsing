@@ -13,10 +13,6 @@ class Product(Base):
     name: Mapped[str] = mapped_column(String)
     price: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    price_history: Mapped[list["PriceHistory"]] = relationship(
-        back_populates="product",
-        cascade="all, delete-orphan"
-    )
     competitor_offers: Mapped[list["CompetitorOffer"]] = relationship(
         back_populates="product",
         cascade="all, delete-orphan",
@@ -65,14 +61,3 @@ class PriceCheck(Base):
     checked_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     offer: Mapped["CompetitorOffer"] = relationship(back_populates="price_checks")
-
-
-class PriceHistory(Base):
-    __tablename__ = "price_history"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
-    price: Mapped[int] = mapped_column(Integer)
-    checked_at: Mapped[datetime | None] = mapped_column(DateTime, default=datetime.utcnow)
-
-    product: Mapped["Product"] = relationship(back_populates="price_history")
