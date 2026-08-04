@@ -36,6 +36,10 @@ class CompetitorCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     website_url: HttpUrl | None = None
 
+class CompetitorUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    website_url: HttpUrl | None = None
+
 class CompetitorResponse(BaseModel):
     id: int
     name: str
