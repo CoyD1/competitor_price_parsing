@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import Competitor, CompetitorOffer
-from schemas import CompetitorCreate, CompetitorOfferCreate
+from schemas import CompetitorCreate, CompetitorOfferCreate, CompetitorOfferUpdate
 from services.products import get_product_or_404
 
 
@@ -52,6 +52,30 @@ async def create_competitor_offer(
     )
 
     db.add(offer)
+    await db.commit()
+    await db.refresh(offer)
+
+    return offer
+
+async def update_competitor_offer(
+        db: AsyncSession,
+        offer: CompetitorOffer,
+        offer_data: CompetitorOfferUpdate,
+) -> CompetitorOffer:
+    update_data = offer_data.model_dump(exclude_unset=True)
+
+    if "product_id" in update_data:
+        await get_product_or_404(db, update_data["product_id"])
+
+    if "competitor_id" in update_data:
+        await get_competitor_or_404(db, update_data["competitor_data"])
+
+    if "url" in update_data and update_data["url"] is not None:
+        update_data["url"] = str(update_data["url"])
+
+    for field, value in update_data.items():
+        setattr(offer, field, value)
+
     await db.commit()
     await db.refresh(offer)
 

@@ -7,10 +7,11 @@ from models import CompetitorOffer, PriceCheck
 from schemas import (
     CompetitorOfferCreate,
     CompetitorOfferResponse,
+    CompetitorOfferUpdate,
     ManualPriceCheckCreate,
     PriceCheckResponse,
 )
-from services.competitors import create_competitor_offer
+from services.competitors import create_competitor_offer, update_competitor_offer
 from services.offers import check_offer_price, create_manual_offer_price_check, get_offer_or_404
 
 router = APIRouter(
@@ -81,3 +82,29 @@ async def read_offer_price_checks(
     price_checks = result.scalars().all()
 
     return price_checks
+
+@router.patch("/{offer_id}", response_model=CompetitorOfferResponse)
+async def update_competitor_offer_endpoint(
+    offer_id: int,
+    offer_update: CompetitorOfferUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    offer = await get_offer_or_404(db, offer_id)
+
+    return await update_competitor_offer(
+        db=db,
+        offer=offer,
+        offer_data=offer_update,
+    )
+
+@router.delete("/{offer_id}")
+async def delete_competitor_offer(
+    offer_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    offer = await get_offer_or_404(db, offer_id)
+
+    await db.delete(offer)
+    await db.commit()
+
+    return {"message": "Offer deleted successfully"}

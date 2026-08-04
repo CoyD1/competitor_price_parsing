@@ -52,6 +52,14 @@ class CompetitorOfferCreate(BaseModel):
     price_selector: str | None = Field(default=None, max_length=255)
     is_active: bool = True
 
+class CompetitorOfferUpdate(BaseModel):
+    product_id: int | None = None
+    competitor_id: int | None = None
+    url: HttpUrl | None = None
+    parser_type: ParserType | None = None
+    price_selector: str | None = Field(default=None, max_length=255)
+    is_active: bool | None = None
+
 class CompetitorOfferResponse(BaseModel):
     id: int
     product_id: int
