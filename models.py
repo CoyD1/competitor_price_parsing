@@ -11,7 +11,7 @@ class Product(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String)
-    price: Mapped[int] = mapped_column(Integer)
+    our_price: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     competitor_offers: Mapped[list["CompetitorOffer"]] = relationship(
         back_populates="product",

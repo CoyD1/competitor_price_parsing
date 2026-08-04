@@ -33,7 +33,7 @@ async def get_product_competitor_summary(
         last_check = last_check_result.scalar_one_or_none()
 
         last_price = last_check.price if last_check else None
-        price_difference = last_price - product.price if last_price is not None else None
+        price_difference = last_price - product.our_price if last_price is not None else None
 
         offer_summaries.append(
             CompetitorOfferSummary(
@@ -65,7 +65,7 @@ async def get_product_competitor_summary(
         cheapest_offer = min(successful_offers, key=lambda offer_summary: offer_summary.last_price)
         min_competitor_price = cheapest_offer.last_price
         cheapest_competitor_name = cheapest_offer.competitor_name
-        price_difference_from_min = product.price - min_competitor_price
+        price_difference_from_min = product.our_price - min_competitor_price
 
         if price_difference_from_min < 0:
             price_position = "below_competitor"
@@ -77,7 +77,7 @@ async def get_product_competitor_summary(
     return ProductCompetitorSummary(
         product_id=product.id,
         product_name=product.name,
-        product_price=product.price,
+        our_price=product.our_price,
         min_competitor_price=min_competitor_price,
         cheapest_competitor_name=cheapest_competitor_name,
         price_difference_from_min=price_difference_from_min,

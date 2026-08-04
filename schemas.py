@@ -7,16 +7,16 @@ from constants import ParserType
 
 class ProductCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
-    price: int = Field(gt=0)
+    our_price: int = Field(gt=0)
 
 class ProductUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
-    price: int | None = Field(default=None, gt=0)
+    our_price: int | None = Field(default=None, gt=0)
 
 class ProductResponse(BaseModel):
     id: int
     name: str
-    price: int
+    our_price: int
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -92,7 +92,7 @@ class CompetitorOfferSummary(BaseModel):
 class ProductCompetitorSummary(BaseModel):
     product_id: int
     product_name: str
-    product_price: int
+    our_price: int
     min_competitor_price: int | None = None
     cheapest_competitor_name: str | None = None
     price_difference_from_min: int | None = None

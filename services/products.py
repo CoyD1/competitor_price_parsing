@@ -26,7 +26,7 @@ async def create_product(
 ) -> Product:
     product = Product(
         name=product_data.name,
-        price=product_data.price,
+        our_price=product_data.our_price,
     )
 
     db.add(product)
