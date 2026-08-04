@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Literal
 
 from pydantic import BaseModel, Field, HttpUrl
+
+from constants import ParserType
 
 
 class ProductCreate(BaseModel):
@@ -31,16 +32,6 @@ class ProductFetchPreviewResponse(BaseModel):
     price_text: str | None = None
     parsed_price: int | None = None
 
-ParserType = Literal["html", "browser", "manual", "dns_experimental"]
-PriceCheckStatus = Literal[
-    "success",
-    "blocked",
-    "selector_not_found",
-    "price_not_found",
-    "network_error",
-    "manual",
-]
-
 class CompetitorCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     website_url: HttpUrl | None = None
@@ -57,7 +48,7 @@ class CompetitorOfferCreate(BaseModel):
     product_id: int
     competitor_id: int
     url: HttpUrl
-    parser_type: ParserType = "html"
+    parser_type: ParserType = ParserType.HTML
     price_selector: str | None = Field(default=None, max_length=255)
     is_active: bool = True
 
@@ -66,7 +57,7 @@ class CompetitorOfferResponse(BaseModel):
     product_id: int
     competitor_id: int
     url: str
-    parser_type: str
+    parser_type: ParserType
     price_selector: str | None = None
     is_active: bool
     created_at: datetime
@@ -87,7 +78,7 @@ class CompetitorOfferSummary(BaseModel):
     offer_id: int
     competitor_id: int
     url: str
-    parser_type: str
+    parser_type: ParserType
     is_active: bool
     last_status: str | None = None
     last_price: int | None = None

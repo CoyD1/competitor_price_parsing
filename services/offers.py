@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from constants import ParserType, PriceCheckStatus
 from models import CompetitorOffer, PriceCheck
 from parser.price_parser import (
     extract_price_from_html,
@@ -53,11 +54,11 @@ async def check_offer_price(
     if not offer.is_active:
         raise HTTPException(status_code=400, detail="Offer is not active")
 
-    if offer.parser_type not in ("html", "browser"):
+    if offer.parser_type not in (ParserType.HTML, ParserType.BROWSER):
         return await create_price_check(
             db=db,
             offer=offer,
-            status="blocked",
+            status=PriceCheckStatus.BLOCKED,
             error_message=f"Parser type '{offer.parser_type}' is not supported yet",
         )
 
@@ -65,12 +66,12 @@ async def check_offer_price(
         return await create_price_check(
             db=db,
             offer=offer,
-            status="selector_not_found",
+            status=PriceCheckStatus.SELECTOR_NOT_FOUND,
             error_message="Offer price selector is not set",
         )
 
     try:
-        if offer.parser_type == "html":
+        if offer.parser_type == ParserType.HTML:
             parsed_price = await fetch_price_from_url(
                 url=offer.url,
                 price_selector=offer.price_selector,
@@ -94,7 +95,7 @@ async def check_offer_price(
         return await create_price_check(
             db=db,
             offer=offer,
-            status="network_error",
+            status=PriceCheckStatus.NETWORK_ERROR,
             error_message=f"Failed to fetch product page: {error.__class__.__name__}",
         )
 
@@ -102,13 +103,13 @@ async def check_offer_price(
         return await create_price_check(
             db=db,
             offer=offer,
-            status="price_not_found",
+            status=PriceCheckStatus.PRICE_NOT_FOUND,
             error_message=str(error),
         )
 
     return await create_price_check(
         db=db,
         offer=offer,
-        status="success",
+        status=PriceCheckStatus.SUCCESS,
         price=parsed_price,
     )
