@@ -74,6 +74,9 @@ class PriceCheckResponse(BaseModel):
 
     model_config = {"from_attributes": True}
 
+class ManualPriceCheckCreate(BaseModel):
+    price: int = Field(gt=0)
+
 class CompetitorOfferSummary(BaseModel):
     offer_id: int
     competitor_id: int

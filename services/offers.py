@@ -10,6 +10,7 @@ from parser.price_parser import (
     fetch_html_with_browser,
     fetch_price_from_url,
 )
+from schemas import ManualPriceCheckCreate
 
 
 async def get_offer_or_404(
@@ -112,4 +113,18 @@ async def check_offer_price(
         offer=offer,
         status=PriceCheckStatus.SUCCESS,
         price=parsed_price,
+    )
+
+async def create_manual_offer_price_check(
+        db: AsyncSession,
+        offer_id: int,
+        price_check_data: ManualPriceCheckCreate,
+) -> PriceCheck:
+    offer = await get_offer_or_404(db, offer_id)
+
+    return await create_price_check(
+        db=db,
+        offer=offer,
+        status=PriceCheckStatus.MANUAL,
+        price=price_check_data.price,
     )
