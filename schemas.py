@@ -90,4 +90,8 @@ class ProductCompetitorSummary(BaseModel):
     product_id: int
     product_name: str
     product_price: int
+    min_competitor_price: int | None = None
+    cheapest_competitor_name: str | None = None
+    price_difference_from_min: int | None = None
+    price_position: str
     offers: list[CompetitorOfferSummary]

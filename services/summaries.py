@@ -50,9 +50,37 @@ async def get_product_competitor_summary(
             )
         )
 
+    successful_offers = [
+    offer_summary
+    for offer_summary in offer_summaries
+    if offer_summary.last_price is not None
+]
+
+    if not successful_offers:
+        min_competitor_price = None
+        cheapest_competitor_name = None
+        price_difference_from_min = None
+        price_position = "no_competitor_prices"
+    else:
+        cheapest_offer = min(successful_offers, key=lambda offer_summary: offer_summary.last_price)
+        min_competitor_price = cheapest_offer.last_price
+        cheapest_competitor_name = cheapest_offer.competitor_name
+        price_difference_from_min = product.price - min_competitor_price
+
+        if price_difference_from_min < 0:
+            price_position = "below_competitor"
+        elif price_difference_from_min == 0:
+            price_position = "same_as_competitor"
+        else:
+            price_position = "above_competitor"
+
     return ProductCompetitorSummary(
         product_id=product.id,
         product_name=product.name,
         product_price=product.price,
+        min_competitor_price=min_competitor_price,
+        cheapest_competitor_name=cheapest_competitor_name,
+        price_difference_from_min=price_difference_from_min,
+        price_position=price_position,
         offers=offer_summaries,
-        )
+    )
