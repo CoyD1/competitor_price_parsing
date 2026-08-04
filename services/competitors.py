@@ -68,7 +68,7 @@ async def update_competitor_offer(
         await get_product_or_404(db, update_data["product_id"])
 
     if "competitor_id" in update_data:
-        await get_competitor_or_404(db, update_data["competitor_data"])
+        await get_competitor_or_404(db, update_data["competitor_id"])
 
     if "url" in update_data and update_data["url"] is not None:
         update_data["url"] = str(update_data["url"])
