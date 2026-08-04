@@ -5,12 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from models import Product
 from schemas import (
+    ProductCompetitorSummary,
     ProductCreate,
     ProductResponse,
     ProductUpdate,
 )
 from services.products import create_product as create_product_service
 from services.products import get_product_or_404
+from services.summaries import get_product_competitor_summary
 
 router = APIRouter(
     prefix="/products",
@@ -57,6 +59,13 @@ async def update_product(
     await db.refresh(product)
 
     return product
+
+@router.get("/{product_id}/competitor-summary", response_model=ProductCompetitorSummary)
+async def read_product_competitor_summary(
+    product_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    return await get_product_competitor_summary(db=db, product_id=product_id)
 
 @router.delete("/{product_id}")
 async def delete_product(

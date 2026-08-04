@@ -82,3 +82,20 @@ class PriceCheckResponse(BaseModel):
     checked_at: datetime
 
     model_config = {"from_attributes": True}
+
+class CompetitorOfferSummary(BaseModel):
+    offer_id: int
+    competitor_id: int
+    url: str
+    parser_type: str
+    is_active: bool
+    last_status: str | None = None
+    last_price: int | None = None
+    price_difference: int | None = None
+    checked_at: datetime | None = None
+
+class ProductCompetitorSummary(BaseModel):
+    product_id: int
+    product_name: str
+    product_price: int
+    offers: list[CompetitorOfferSummary]
