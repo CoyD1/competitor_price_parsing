@@ -77,6 +77,7 @@ class PriceCheckResponse(BaseModel):
 class CompetitorOfferSummary(BaseModel):
     offer_id: int
     competitor_id: int
+    competitor_name: str
     url: str
     parser_type: ParserType
     is_active: bool
