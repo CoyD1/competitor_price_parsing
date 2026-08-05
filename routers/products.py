@@ -7,9 +7,11 @@ from models import Product
 from schemas import (
     ProductCompetitorSummary,
     ProductCreate,
+    ProductOfferChecksResponse,
     ProductResponse,
     ProductUpdate,
 )
+from services.product_checks import check_product_offers
 from services.products import create_product as create_product_service
 from services.products import get_product_or_404
 from services.summaries import get_product_competitor_summary
@@ -66,6 +68,13 @@ async def read_product_competitor_summary(
     db: AsyncSession = Depends(get_db),
 ):
     return await get_product_competitor_summary(db=db, product_id=product_id)
+
+@router.post("/{product_id}/check-offers", response_model=ProductOfferChecksResponse)
+async def check_product_offers_endpoint(
+    product_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    return await check_product_offers(db=db, product_id=product_id)
 
 @router.delete("/{product_id}")
 async def delete_product(

@@ -110,3 +110,8 @@ class ProductCompetitorSummary(BaseModel):
     price_difference_from_min: int | None = None
     price_position: str
     offers: list[CompetitorOfferSummary]
+
+class ProductOfferChecksResponse(BaseModel):
+    product_id: int
+    checked_count: int
+    checks: list[PriceCheckResponse]
